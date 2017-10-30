@@ -32,15 +32,24 @@ class Search():
     @commands.command()
     async def youtube(self, *, query:str):
         """Returns the first youtube video"""        
-        webpage = 'https://www.youtube.com/results?search_query=' + query.replace(" ", "+")
-        html_content = urllib.request.urlopen(webpage)
-        str_html = html_content.read().decode("utf-8")
-        match = re.search(r'href="/watch?([^\'" >]+)', str_html)
-        if match:
-            end = match.group(0).split("\"")
-            await self.bot.say(webpage + ' https://www.youtube.com' + end[1])
-        else:
-            await self.bot.say('https://www.youtube.com/watch?v=rbeEbJdlAX4')
+        isNotAVideo = True
+        url = 'https://youtube.com/results?search_query=' + query.replace(" ", "+")
+        r = requests.get(url).text
+        soup = BeautifulSoup(r)
+        yt = soup.find_all("div", {"class": "yt-lockup-content"})
+        num = 0
+        while isNotAVideo:
+            try:
+                if (not 'list' in yt[num].a.get('href') and 'watch' in yt[num].a.get('href') and len(yt[num].get('class')) < 2):
+                    isNotAVideo = False
+                else:
+                    num = num + 1
+            except AttributeError:
+                num = num + 1
+                
+        link = yt[num].a.get('href')
+        page = 'https://youtube.com' + link
+        await self.bot.say(page)
        
     @commands.command(pass_context=True)
     async def bImage(self, ctx, query:str, num:int = 1):
