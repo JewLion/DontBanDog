@@ -132,20 +132,23 @@ class Voice:
         message = ctx.message
         
         def youtube(query:str, num:int = 0):
-            fk = True
+            isNotAVideo = True
             url = 'https://youtube.com/results?search_query=' + query.replace(" ", "+")
             r = requests.get(url).text
-            soup = BeautifulSoup(r, "html.parser")
+            soup = BeautifulSoup(r)
+            yt = soup.find_all("div", {"class": "yt-lockup-content"})
+            num = 0
             while isNotAVideo:
-                yt = soup.find_all("div", {"class": "yt-lockup-content"})[num]
-                link = yt.find_all("a")[0].get("href")
-                if link.split('?')[0] != '/watch':
+                try:
+                    if (not 'list' in yt[num].a.get('href') and 'watch' in yt[num].a.get('href') and len(yt[num].get('class')) < 2):
+                        isNotAVideo = False
+                    else:
+                        num = num + 1
+                except AttributeError:
                     num = num + 1
-                    isNotAVideo = True
-                else:
-                    isNotAVideo = False
+                       
+            link = yt[num].a.get('href')
             page = 'https://youtube.com' + link
-                
             return page
         
         def restart_program():
