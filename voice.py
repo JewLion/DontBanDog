@@ -10,6 +10,7 @@ import time
 from bs4 import BeautifulSoup
 from discord.ext import commands
 
+#Repurposed from Rapptz Example
 
 if not discord.opus.is_loaded():
     discord.opus.load_opus('opus')
