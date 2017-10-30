@@ -269,7 +269,10 @@ class Voice:
                 urllib.request.urlretrieve(sndsite, "word.ogg")
                 player = state.voice.create_ffmpeg_player('word.ogg')
                 player.start()
-                time.sleep(.25)
+                fileSize = os.path.getsize('word.ogg')
+                ## Mathematical approximation of file size to sound length
+                waitTime = 0.3750507034 * (1.00009288 ** fileSize)
+                time.sleep(waitTime + 0.1)
             except IndexError:
                 await self.bot.say(arr[x] + ' is not a word')
    
