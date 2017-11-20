@@ -1,5 +1,5 @@
 # DontBanDog
-Python Discord Bot for a group of friends, includes searching and music playing capabilities
+An example Python Discord Bot for a group of friends, includes searching and music playing capabilities
 
 ## Requirements
 * python 3.6
@@ -11,4 +11,4 @@ Python Discord Bot for a group of friends, includes searching and music playing 
 * ```python bot.py``` to run the bot in command line / prompt
 
 ## Maintenence
-* Dog definetly has many problems, so tell me and I am always trying to fix them!
+* Dog definitetly has many problems, so tell me and I am always trying to fix them!
