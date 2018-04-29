@@ -1,0 +1,5 @@
+requests==2.18.4
+beautifulsoup4==4.6.0
+discord==0.0.2
+pafy==0.5.4
+wikipedia==1.4.0
