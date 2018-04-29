@@ -3,8 +3,7 @@ An example Python Discord Bot for a group of friends, includes searching and mus
 
 ## Requirements
 * python 3.6
-* import `time`, `random`, `os`, `sys`
-* pip install `discord`, `urllib`, `requests`, `wikipedia`, `beautifulsoup4`, `youtube_dl`
+* pip install requirements.txt
 * install ffmpeg
 
 ## Setup
