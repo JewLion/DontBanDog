@@ -7,6 +7,8 @@ An example Python Discord Bot for a group of friends, includes searching and mus
 * install ffmpeg
 
 ## Setup
+* go to https://github.com/reactiflux/discord-irc/wiki/Creating-a-discord-bot-&-getting-a-token to learn how to create the bot account
+* copy your token into the token.txt file
 * ```python bot.py``` to run the bot in command line / prompt
 
 ## Maintenence
