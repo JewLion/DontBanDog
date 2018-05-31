@@ -184,8 +184,26 @@ class Voice:
             player.volume = 0.2
             entry = VoiceEntry(ctx.message, player)
             await self.bot.say('Enqueued ' + str(entry))
-            await state.songs.put(entry)		
-
+            await state.songs.put(entry)	
+            
+    @commands.command(pass_context=True)
+    async def lol(self, ctx):
+        """Plays a Laugh Track"""
+        ##setup
+        state = self.get_voice_state(ctx.message.server)
+        opts = {
+            'default_search': 'auto',
+            'quiet': True,
+        }
+        if state.voice is None:
+                success = await ctx.invoke(self.summon)
+                if not success:
+                    return
+        player = state.voice.create_ffmpeg_player('laugh.mp3')
+        player.start()
+        await self.bot.purge_from(ctx.message.channel, limit = 1)
+        #await self.bot.say('lol')
+        
     @commands.command(pass_context=True)
     async def prow(self, ctx, word:str):
         """Returns the pronounciation of a word from Wiktionary"""
