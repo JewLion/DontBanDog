@@ -83,13 +83,6 @@ class Voice(commands.Cog):
         vc = ctx.voice_client
         if not vc:
             vc = await channel.connect()
-        if(name[-4:] == ''):
-            msg = await ctx.send('Thumbs Up if Hunter can Play a Song')
-
-            def check(reaction, user):
-                return (str(user)[-4:] != '9209') & (reaction.emoji == '👍')
-            res = await self.bot.wait_for_reaction(message=msg, check = check)
-            await ctx.send('{0.user} reacted with {0.reaction.emoji}!'.format(res))
 
         def restart_program():
             python = sys.executable
