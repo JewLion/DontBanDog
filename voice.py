@@ -113,7 +113,7 @@ class Voice(commands.Cog):
     @commands.command(pass_context=True)
     async def lol(self, ctx):
         """Plays a Laugh Track"""
-        await daudio.play_soundfile(self, ctx, 'lol.mp3')
+        await daudio.play_soundfile(self, ctx, 'audio/lol.mp3')
 
     @commands.command(pass_context=True, no_pm=True)
     async def volume(self, ctx, value : int):

@@ -62,12 +62,12 @@ async def disconnect(vc, ctx, cls):
 
 async def play_soundfile(cls, ctx, sf):
         vc = ctx.voice_client
-        path = "audio/" + sf
+        path = sf
         if vc:
             state = vc
         else:
             state = await ctx.message.author.voice.channel.connect()
-        player = state.play(discord.FFmpegPCMAudio('audio/' + sf))
+        player = state.play(discord.FFmpegPCMAudio(sf))
         state.source.volume = 0.2
         await ctx.message.channel.purge(limit=1)
         waitTime = MP3(path).info.length
