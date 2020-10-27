@@ -18,17 +18,18 @@ from discord.ext import commands
 youtube_dl.utils.bug_reports_message = lambda: ''
 ytdl_format_options = {
             'format': 'bestaudio/best',
-                'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
-                    'restrictfilenames': True,
-                        'noplaylist': True,
-                            'nocheckcertificate': True,
-                                'ignoreerrors': False,
-                                    'logtostderr': False,
-                                        'quiet': True,
-                                            'no_warnings': True,
-                                                'default_search': 'auto',
-                                                    'source_address': '0.0.0.0' # bind to ipv4 since ipv6 addresses cause issues sometimes
-                                                    }
+            'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
+            'restrictfilenames': True,
+            'noplaylist': True,
+            'nocheckcertificate': True,
+            'ignoreerrors': False,
+            'logtostderr': False,
+            'quiet': True,
+            'no_warnings': True,
+            'default_search': 'auto',
+            'source_address': '0.0.0.0'
+            # bind to ipv4 since ipv6 addresses cause issues sometimes
+}
 
 ffmpeg_options = {
             'options': '-vn'
@@ -54,8 +55,15 @@ def youtube(query: str, num: int = 0):
     num1 = yInit.find('{')
     res = yInit[num1:-1]
     resource = json.loads(res)
-    ls = resource['contents']['twoColumnSearchResultsRenderer']['primaryContents']['sectionListRenderer']['contents']
-    videoRenderer = ls[0]['itemSectionRenderer']['contents'][0]['videoRenderer']
+    ls = resource['contents']['twoColumnSearchResultsRenderer']
+    ls = ls['primaryContents']['sectionListRenderer']['contents']
+    content = ls[0]['itemSectionRenderer']['contents']
+    for i in range(10):
+        try:
+            videoRenderer = content[i]['videoRenderer']
+            break
+        except Exception:
+            print(content[i])
     vid = (videoRenderer["videoId"])
     page = ("https://youtube.com/watch?v=" + vid)
     return page
@@ -91,11 +99,12 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.views = data.get('view_count')
         self.uploader = data.get('uploader')
         self.duration = data.get('duration')
-    
+
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=True):
         loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+        data = await loop.run_in_executor(
+            None, lambda: ytdl.extract_info(url, download=not stream))
         if 'entries' in data:
             data = data['entries'][0]
         filename = data['url'] if stream else ytdl.prepare_filename(data)
@@ -112,18 +121,21 @@ class VoiceEntry:
         self.vc = vc
 
     def __str__(self):
-        fmt = '*{0.title}* uploaded by {0.uploader} and requested by {1.display_name} with '
+        fmt = '*{0.title}* uploaded by {0.uploader} and \
+                requested by {1.display_name} with '
         try:
             views = self.player.views
             num = int(views)
             fmt = fmt + (f"{num:,d}") + " views"
-        except:
+        except Exception:
             fmt += "an unknown amount of views"
         fmt += " at {0}% volume".format(self.volume*100)
         duration = self.player.duration
         if duration:
-            fmt = fmt + ' [length: {0[0]}m {0[1]}s]'.format(divmod(duration, 60))
+            fmt = fmt + ' [length: {0[0]}m {0[1]}s]'.format(
+                divmod(duration, 60))
         return fmt.format(self.player, self.requester)
+
 
 class VoiceState:
     def __init__(self, bot):
@@ -132,7 +144,7 @@ class VoiceState:
         self.bot = bot
         self.play_next_song = asyncio.Event()
         self.songs = asyncio.Queue()
-        self.skip_votes = set() # a set of user_ids that voted
+        self.skip_votes = set()  # a set of user_ids that voted
         self.audio_player = bot.loop.create_task(self.audio_player_task())
 
     def is_playing(self):
@@ -155,21 +167,20 @@ class VoiceState:
     async def audio_player_task(self):
         await self.bot.wait_until_ready()
         while True:
-        #while self.bot.is_closed():
             self.play_next_song.clear()
             self.current = await self.songs.get()
             if False:
-            #if not isinstance(self.current, YTDLSource):
                 try:
-                    self.current = await YTDLSource.regather_stream(self.current, loop=self.bot.loop)
+                    self.current = await YTDLSource.regather_stream(
+                        self.current, loop=self.bot.loop)
                 except Exception as e:
-                    print (e)
+                    print(e)
                     continue
 
-            self.current.vc.play(self.current.player, after=lambda _: self.toggle_next())
-            #self.current.vc.play(self.current.player, after=lambda _: self.bot.loop.call_soon_threadsafe(self.play_next_song.set))
+            self.current.vc.play(
+                self.current.player, after=lambda _: self.toggle_next())
+
             await self.current.channel.send('Now playing ' + str(self.current))
             await self.play_next_song.wait()
-            #self.current.cleanup()
-            #self.current = None
-
+            # self.current.cleanup()
+            # self.current = None
