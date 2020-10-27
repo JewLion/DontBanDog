@@ -9,72 +9,71 @@ import json
 from bs4 import BeautifulSoup
 from discord.ext import commands
 
+
 class Search(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command(pass_context=True)
-    async def scrabble (self, ctx, word:str):
-        webpage = "http://www.dictionary.com/browse/" + word
-        r = requests.get(webpage).text
-        soup = BeautifulSoup(r)
-        try:
-            points = soup.find_all('div', {'class':'game-scrabble'})[0].text
-        except IndexError:
-            points = 0
+    async def scrabble(self, ctx, word):
+        url = "https://dictionary.com/browse/" + word
+        r = requests.get(url).text
+        if ("no results" in r.lower()):
+            await ctx.send("word bad bad")
+            return
+        values = [1, 3, 3, 2, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 1, 3, 10, 1, 1, 1,
+                  1, 4, 4, 8, 4, 10]
+        points = 0
+        for letter in word:
+            num = ord(letter.lower())-97
+            if (num < 0 or num > 25):
+                await ctx.send("word bad bad")
+                return
+            points += values[num]
         await ctx.send(points)
 
     @commands.command(pass_context=True)
-    async def youtube(self, ctx, *, query:str):
+    async def youtube(self, ctx, *, query):
         """Returns the first youtube video"""
-        isNotAVideo = True
-        url = 'https://youtube.com/results?search_query=' + query.replace(" ", "+")
-        r = requests.get(url).text
-        soup = BeautifulSoup(r)
-        yt = soup.find_all("div", {"class": "yt-lockup-content"})
-        num = 0
-        while isNotAVideo:
-            try:
-                if (not 'list' in yt[num].a.get('href')
-                and 'watch' in yt[num].a.get('href')
-                and len(yt[num].get('class')) < 2
-                and not 'googleads.g.doubleclick.net' in yt[num].a.get('href')):
-                    isNotAVideo = False
-                else:
-                    num = num + 1
-            except AttributeError:
-                num = num + 1
 
-        link = yt[num].a.get('href')
-        page = 'https://youtube.com' + link
+        utub = 'https://youtube.com/results?search_query='
+        url = utub + query.replace(" ", "+")
+        r = requests.get(url).text
+        num1 = r.find('{"videoRenderer')
+        num2 = r.find('{"videoRenderer', num1+1)
+        # print (num1)
+        # print (num2)
+        videoRenderer = (json.loads(r[num1:num2-1])["videoRenderer"])
+        vid = (videoRenderer["videoId"])
+        page = ("https://youtube.com/watch?v=" + vid)
         await ctx.send(page)
 
     @commands.command(pass_context=True)
-    async def bImage(self, ctx, query:str, num:int = 1):
+    async def bImage(self, ctx, query, num=1):
         """Returns the first image from the bing search"""
 
         webpage = "http://www.bing.com/images/search?q=" + query.replace(" ", "+") + "&view=detailv2&adlt=off&selectedIndex=0"
+
         html_content = urllib.request.urlopen(webpage)
         str_html = html_content.read().decode("utf-8")
         match = re.findall(r'src="http://?([^\'" >]+)', str_html)
         if match:
             try:
                 await ctx.send("http://" + match[num-1])
-            except:
+            except (Exception):
                 await ctx.send("```No " + str(num) + "th Result```")
         else:
             await ctx.send("```No Image Found```")
 
     @commands.command(pass_context=True)
-    async def gImage(self, ctx, query:str, num:int = 1):
+    async def gImage(self, ctx, query, num=1):
         """Returns the first image from the google search"""
-        #imageKey = "AIzaSyAiIu9VFK4ww8iQUD7XAR6QvRcYW83B3Ks" 
         imageKey = ""
         f = open("secrets.txt", "r")
         imageKey = f.readlines()[1].strip()
         f.close()
         webpage = "https://www.googleapis.com/customsearch/v1?cx=013629950505680552901%3Axac8ijijt08&searchType=image&key=" + imageKey + "&q=" + query.replace(" ", "+")
-        r  = requests.get(webpage).text
+        r = requests.get(webpage).text
         js = json.loads(r)
         try:
             pic = (js['items'][1-num]['link'])
@@ -94,15 +93,14 @@ class Search(commands.Cog):
             return
         except IndexError:
             await ctx.send("```No " + str(num) + "th Result```")
-        except:
+        except Exception:
             try:
                 await ctx.send(pic)
-            except:
+            except Exception:
                 await ctx.send("```No Image Found```")
 
-
     @commands.command(pass_context=True)
-    async def ub(self, ctx, query:str = random):
+    async def ub(self, ctx, query=random):
         """Returns the first Urban Dictionary result"""
         if query == random:
             webpage = "https://www.urbandictionary.com/random.php"
